@@ -1,0 +1,17 @@
+- step_1:
+    assign:
+    - greeting: Hello
+    - name: AppGyver
+    - greetingWithName: ${greeting + ' ' + name}
+    - baz: 10
+- step_2:
+    call: http.get
+    args:
+      url: https://www.google.com
+      query:
+        - q: ${greetingWithName}
+    result: response
+- step_3:
+    call: log
+    args:
+      - ${response}

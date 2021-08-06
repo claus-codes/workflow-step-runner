@@ -2,5 +2,8 @@
   "name": "workflow-step-runner",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "yaml": "^1.10.2"
+  }
 }
