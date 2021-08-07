@@ -31,8 +31,45 @@ function injectReturnToFunctionBody(fnBody) {
   return fnBody.substr(0, lastSemicolonIndex + 1) + 'return ' + fnBody.substr(lastSemicolonIndex + 1)
 }
 
+function processAssignValuesRecursive(obj, vars) {
+  Object.keys(obj).forEach(key => {
+    if (typeof obj[key] === 'object' || typeof obj[key] === 'array') {
+      processAssignValuesRecursive(obj[key], vars)
+    }
+    else if (typeof obj[key] === 'string') {
+      const fn = parseFunctionFromString(obj[key], vars)
+      if (fn) {
+        vars[key] = fn()
+      }
+      else {
+        vars[key] = obj[key]
+      }
+    }
+    else {
+      vars[key] = obj[key]
+    }
+  })
+}
+
+function processInlineCodeRecursive(obj, vars) {
+  Object.keys(obj).forEach(key => {
+    if (typeof obj[key] === 'object' || typeof obj[key] === 'array') {
+      processInlineCodeRecursive(obj[key], vars)
+    }
+    else if (typeof obj[key] === 'string') {
+      const fn = parseFunctionFromString(obj[key], vars)
+      if (fn) {
+        obj[key] = fn()
+      }
+    }
+  })
+}
+
 module.exports = {
   parseFunctionFromString,
   createFunctionWithVars,
   injectReturnToFunctionBody,
+
+  processAssignValuesRecursive,
+  processInlineCodeRecursive,
 }

@@ -1,8 +1,17 @@
 const YAML = require('yaml')
 const fs = require('fs')
 
-const { parseFunctionFromString } = require('./src/util/inline-code')
+const { processAssignValuesRecursive, processInlineCodeRecursive } = require('./src/util/inline-code')
 const { createWorkflowFromConfig } = require('./src/util/config-processor')
+
+function loadModule(name, callbacks) {
+  const moduleLoader = require(`./src/module/${name}`)
+  moduleLoader(callbacks)
+}
+
+const callbacks = {}
+loadModule('console', callbacks)
+loadModule('http', callbacks)
 
 const FILE = 'test.yaml'
 const workflowConfig = YAML.parse(fs.readFileSync(FILE, 'utf-8'))
@@ -34,46 +43,15 @@ async function executeStep(step, vars) {
     processAssignValuesRecursive(step.assign, vars)
   }
   if (step.switch) {
-
+    // TODO
+  }
+  if (step.call) {
+    await callbacks[step.call](step, vars)
   }
   processInlineCodeRecursive(step, vars)
 
-  console.log(`Vars after "${step.__name}"`, vars)
+  //console.log(`Vars after "${step.__name}"`, vars)
 
   const executionTimeInSeconds = (Date.now() - start) / 1000
   console.log(`Step execution finished. Time elapsed: ${executionTimeInSeconds} seconds.`)
-}
-
-function processAssignValuesRecursive(obj, vars) {
-  Object.keys(obj).forEach(key => {
-    if (typeof obj[key] === 'object' || typeof obj[key] === 'array') {
-      processAssignValuesRecursive(obj[key], vars)
-    }
-    else if (typeof obj[key] === 'string') {
-      const fn = parseFunctionFromString(obj[key], vars)
-      if (fn) {
-        vars[key] = fn()
-      }
-      else {
-        vars[key] = obj[key]
-      }
-    }
-    else {
-      vars[key] = obj[key]
-    }
-  })
-}
-
-function processInlineCodeRecursive(obj, vars) {
-  Object.keys(obj).forEach(key => {
-    if (typeof obj[key] === 'object' || typeof obj[key] === 'array') {
-      processInlineCodeRecursive(obj[key], vars)
-    }
-    else if (typeof obj[key] === 'string') {
-      const fn = parseFunctionFromString(obj[key], vars)
-      if (fn) {
-        obj[key] = fn()
-      }
-    }
-  })
 }

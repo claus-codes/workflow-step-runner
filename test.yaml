@@ -1,17 +1,15 @@
 - step_1:
     assign:
-    - greeting: Hello
-    - name: AppGyver
-    - greetingWithName: ${greeting + ' ' + name}
-    - baz: 10
+    - numEntries: 1
+    - timePeriod: month
 - step_2:
     call: http.get
     args:
-      url: https://www.google.com
+      url: https://www.reddit.com/r/videos/top.json
       query:
-        - q: ${greetingWithName}
+      - limit: ${numEntries}
+      - t: ${timePeriod}
     result: response
 - step_3:
-    call: log
-    args:
-      - ${response}
+    call: console.log
+    args: ${response}
