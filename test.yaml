@@ -1,15 +1,30 @@
 - step_1:
     assign:
-    - numEntries: 1
-    - timePeriod: month
+      numEntries: 1
+      timePeriod: month
 - step_2:
     call: http.get
     args:
       url: https://www.reddit.com/r/videos/top.json
       query:
-      - limit: ${numEntries}
-      - t: ${timePeriod}
+        limit: ${numEntries}
+        t: ${timePeriod}
     result: response
 - step_3:
     call: console.log
     args: ${response}
+- step_4:
+    switch:
+      - condition: ${response.body.data.children.length > 1}
+        next: single_response
+    next: multi_response
+- single_response:
+    call: console.log
+    args:
+      - 'Small'
+      - ${response}
+- multi_response:
+    call: console.log
+    args:
+      - Big
+      - ${response}

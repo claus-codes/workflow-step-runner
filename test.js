@@ -1,7 +1,11 @@
 const YAML = require('yaml')
 const fs = require('fs')
 
-const { processAssignValuesRecursive, processInlineCodeRecursive } = require('./src/util/inline-code')
+const {
+  processAssignValuesRecursive,
+  processInlineCodeRecursive,
+  parseFunctionFromString
+} = require('./src/util/inline-code')
 const { createWorkflowFromConfig } = require('./src/util/config-processor')
 
 function loadModule(name, callbacks) {
@@ -43,17 +47,18 @@ async function executeStep(step, vars) {
   if (step.assign) {
     processAssignValuesRecursive(step.assign, vars)
   }
-  else {
-    processInlineCodeRecursive(step, vars)
-  }
-  if (step.switch) {
-    // TODO
+  else if (step.switch) {
+    for (const switchCase of step.switch) {
+      const conditionFn = parseFunctionFromString(switchCase.condition, vars)
+      if (conditionFn()) {
+        return switchCase.next
+      }
+    }
   }
   else if (step.call) {
+    processInlineCodeRecursive(step, vars)
     nextStep = await callbacks[step.call](step, vars)
   }
-
-  //console.log(`Vars after "${step.__name}"`, vars)
 
   const executionTimeInSeconds = (Date.now() - start) / 1000
   console.log(`Step execution finished. Time elapsed: ${executionTimeInSeconds} seconds.`)

@@ -7,9 +7,11 @@ function createFetchWrapper(method) {
     const requestUrl = new URL(url)
 
     if (query) {
-      const flatQuery = query.reduce((params, value) => {
+      // Flatten potential array due to yaml syntax fuckery
+      const flatQuery = Array(query).reduce((params, value) => {
         return { ...params, ...value }
       }, {})
+      // Build search parameters
       const searchParams = new URLSearchParams()
       Object.keys(flatQuery).forEach(key => {
         searchParams.append(key, flatQuery[key])
@@ -23,9 +25,9 @@ function createFetchWrapper(method) {
       body,
     })
 
+    // Handle JSON response
     const isJson = response.headers.get('content-type').includes('application/json')
     const responseBody = await (isJson ? response.json() : response.text())
-    console.log(responseBody)
     vars[result] = {
       status: response.status,
       body: responseBody,
