@@ -28,8 +28,8 @@ async function executeWorkflow(workflow) {
   const start = Date.now()
   while (stepName) {
     const step = workflow.stepDictionary[stepName]
-    await executeStep(step, workflow.vars)
-    stepName = step.next || workflow.stepIndex[workflow.stepIndex.indexOf(stepName) + 1]
+    const nextStep = await executeStep(step, workflow.vars)
+    stepName = nextStep || step.next || workflow.stepIndex[workflow.stepIndex.indexOf(stepName) + 1]
   }
   const executionTimeInSeconds = (Date.now() - start) / 1000
   console.log(`Workflow execution finished. Total time elapsed: ${executionTimeInSeconds} seconds.`)
@@ -38,20 +38,24 @@ async function executeWorkflow(workflow) {
 async function executeStep(step, vars) {
   console.log(`Running step "${step.__name}"`)
   const start = Date.now()
+  let nextStep
 
   if (step.assign) {
     processAssignValuesRecursive(step.assign, vars)
   }
+  else {
+    processInlineCodeRecursive(step, vars)
+  }
   if (step.switch) {
     // TODO
   }
-  if (step.call) {
-    await callbacks[step.call](step, vars)
+  else if (step.call) {
+    nextStep = await callbacks[step.call](step, vars)
   }
-  processInlineCodeRecursive(step, vars)
 
   //console.log(`Vars after "${step.__name}"`, vars)
 
   const executionTimeInSeconds = (Date.now() - start) / 1000
   console.log(`Step execution finished. Time elapsed: ${executionTimeInSeconds} seconds.`)
+  return nextStep
 }
