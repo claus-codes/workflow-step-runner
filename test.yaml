@@ -16,15 +16,21 @@
 - step_4:
     switch:
       - condition: ${response.body.data.children.length > 1}
-        next: single_response
-    next: multi_response
-- single_response:
-    call: console.log
-    args:
-      - 'Small'
-      - ${response}
+        next: multi_response
+    next: single_response
 - multi_response:
     call: console.log
     args:
       - Big
       - ${response}
+    next: end
+- single_response:
+    call: console.log
+    args:
+      - 'Small'
+      - ${response}
+    next: end
+- end:
+    call: console.log
+    args:
+      - Finished workflow...
