@@ -17,18 +17,19 @@ function createFunctionWithVars(fnBody, vars) {
 }
 
 function injectReturnToFunctionBody(fnBody) {
+  const returnPrefix = 'return '
   // Check if return already exists
-  if (fnBody.substr(0, 'return '.length) === 'return ') return fnBody
+  if (fnBody.substr(0, returnPrefix.length) === returnPrefix) return fnBody
 
-  // Find the last semicolon index so we can inject 'return '
+  // Find the last semicolon index so we can inject returnPrefix
   const lastSemicolonIndex = fnBody.lastIndexOf(';')
   // No semicolons so just prepend
   if (lastSemicolonIndex === -1) {
-    return `return ${fnBody}`
+    return returnPrefix + fnBody
   }
-  // Splice return to last semicolon index
-  // NOTE: does not take semicolons inside strings into consideration
-  return fnBody.substr(0, lastSemicolonIndex + 1) + 'return ' + fnBody.substr(lastSemicolonIndex + 1)
+  // Splice returnPrefix to last semicolon index
+  // FIXME: does not take semicolons inside strings into consideration
+  return fnBody.substr(0, lastSemicolonIndex + 1) + returnPrefix + fnBody.substr(lastSemicolonIndex + 1)
 }
 
 function processAssignValuesRecursive(obj, vars) {

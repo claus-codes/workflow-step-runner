@@ -1,8 +1,8 @@
-- step_1:
+- assign_vars:
     assign:
       numEntries: 1
       timePeriod: month
-- step_2:
+- fetch_top_videos:
     call: http.get
     args:
       url: https://www.reddit.com/r/videos/top.json
@@ -10,27 +10,22 @@
         limit: ${numEntries}
         t: ${timePeriod}
     result: response
-- step_3:
-    call: console.log
-    args: ${response}
-- step_4:
+- condition:
     switch:
       - condition: ${response.body.data.children.length > 1}
-        next: multi_response
-    next: single_response
-- multi_response:
+        next: log_multi_response
+    next: log_single_response
+- log_multi_response:
     call: console.log
     args:
-      - Big
-      - ${response}
+      - 'Multi response item:'
+      - ${response.body.data.children.map(v => v.data.title)}
     next: end
-- single_response:
+- log_single_response:
     call: console.log
     args:
-      - 'Small'
-      - ${response}
+      - 'Single response item:'
+      - ${response.body.data.children[0].data.title}
     next: end
 - end:
-    call: console.log
-    args:
-      - Finished workflow...
+    call: noop

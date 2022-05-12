@@ -35,12 +35,12 @@ function createFetchWrapper(method) {
   }
 }
 
-function httpModuleLoader(modules) {
-  modules['http.get'] = createFetchWrapper('GET')
-  modules['http.post'] = createFetchWrapper('POST')
-  modules['http.put'] = createFetchWrapper('PUT')
-  modules['http.patch'] = createFetchWrapper('PATCH')
-  modules['http.delete'] = createFetchWrapper('DELETE')
+function httpModuleLoader(moduleCallbacks) {
+  moduleCallbacks['http.get'] = createFetchWrapper('GET')
+  moduleCallbacks['http.post'] = createFetchWrapper('POST')
+  moduleCallbacks['http.put'] = createFetchWrapper('PUT')
+  moduleCallbacks['http.patch'] = createFetchWrapper('PATCH')
+  moduleCallbacks['http.delete'] = createFetchWrapper('DELETE')
 }
 
 module.exports = httpModuleLoader
