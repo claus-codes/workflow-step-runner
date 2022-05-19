@@ -1,5 +1,4 @@
 const fetch = require('node-fetch')
-const url = require('url')
 
 function createFetchWrapper(method) {
   return async ({ args, result }, vars) => {
